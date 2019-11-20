@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
@@ -36,7 +37,7 @@ public class GetFieldsList {
 	 * @throws IOException If there is an error getting the fields.
 	 */
 
-	private static List<String> processField(PDField field, String sParent, List<String> fieldNames)
+	private static List<String> processField(PDField field, String sParent, List<List<String>> fieldNames)
 			throws IOException {
 		String partialName = field.getPartialName();
 
@@ -46,6 +47,8 @@ public class GetFieldsList {
 					sParent = sParent + "." + partialName;
 				}
 			}
+			List<String> parent = new ArrayList<String>();
+			fieldNames.add(parent);
 			System.out.println(sParent);
 
 			for (PDField child : ((PDNonTerminalField) field).getChildren()) {
@@ -93,31 +96,24 @@ public class GetFieldsList {
 		dm.get().getEMP5624_E0Page10txtF_first_name0PDTextField();
 		
 		List<String> fieldNames = getFieldsList();
-		for (String fieldname : fieldNames) {
-			System.out.println(fieldname + "");
-		}
+//		for (String fieldname : fieldNames) {
+//			System.out.println(fieldname + "");
+//		}
 //		String formTemplate = "C:\\Users/vivsh/Downloads/1.pdf";
 		ClassPathResource pdfFile = new ClassPathResource("1.pdf");
 		
 
-		try (PDDocument pdfDocument = PDDocument.load(pdfFile.getFile())) {
-			// get the document catalog
+		try (PDDocument pdfDocument = PDDocument.load(pdfFile.getInputStream())) {
 			PDAcroForm acroForm = pdfDocument.getDocumentCatalog().getAcroForm();
-
-			// as there might not be an AcroForm entry a null check is necessary
 			if (acroForm != null) {
-				// Retrieve an individual field and set its value.
-				
-
-				// If a field is nested within the form tree a fully qualified name
-				// might be provided to access the field.
 				for (String fieldname : fieldNames) {
 //					System.out.println("public string"+fieldname.replace("[", "").replace(".", "")
 //							.replace("]", "") + "");
 					if(fieldname.contains("PDTextField")) {
-
 					PDTextField field = (PDTextField) acroForm.getField(fieldname.replace("PDTextField", ""));
-					field.setValue(dm.get().getEMP5624_E0Page10txtF_first_name0PDTextField());
+					String str = fieldname.replace("[", "").replace(".", "").replace("]", "");
+					DataModel dim =dm.get();
+					field.setValue(dim.EMP5624_E0Page10rb_language_oral0PDRadioButton);
 					} else if(fieldname.contains("PDCheckBox")) {
 //						PDCheckBox field = (PDCheckBox) acroForm.getField(fieldname);
 //						field.check();
@@ -136,20 +132,14 @@ public class GetFieldsList {
 			// Save and close the filled out form.
 			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-
 			pdfDocument.setAllSecurityToBeRemoved(true);
 			pdfDocument.save(out);
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 
-			if(pdfDocument.isAllSecurityToBeRemoved()) {
-				
-			}
 //			pdfDocument.save("target/FillFormField.pdf");
 			return in;
 //			pdfDocument.save("C:\\Users/vivsh/Downloads/45.pdf");
 		
 	}
-		
-
 }
 }
