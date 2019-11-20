@@ -69,65 +69,10 @@ public class GetFieldsList {
 		return fieldNames;
 	}
 
-	/**
-	 * This will read a PDF file and print out the form elements
-	 * 
-	 * @throws IOException If there is an error importing the FDF document.
-	 */
-	public static void main(String[] args) throws IOException {
-		List<String> fieldNames = getFieldsList();
-		for (String fieldname : fieldNames) {
-			System.out.println(fieldname + "");
-		}
-		String formTemplate = "C:\\Users/vivsh/Downloads/1.pdf";
-
-		try (PDDocument pdfDocument = PDDocument.load(new File(formTemplate))) {
-			// get the document catalog
-			PDAcroForm acroForm = pdfDocument.getDocumentCatalog().getAcroForm();
-
-			// as there might not be an AcroForm entry a null check is necessary
-			if (acroForm != null) {
-				// Retrieve an individual field and set its value.
-				
-
-				// If a field is nested within the form tree a fully qualified name
-				// might be provided to access the field.
-				for (String fieldname : fieldNames) {
-//					System.out.println("public string"+fieldname.replace("[", "").replace(".", "")
-//							.replace("]", "") + "");
-					if(fieldname.contains("PDTextField")) {
-					System.out.println("public string "+fieldname.replace("[", "").replace(".", "")
-							.replace("]", "") + ";");
-//					PDTextField field = (PDTextField) acroForm.getField(fieldname);
-//					field.setValue("Text Entry");
-					} else if(fieldname.contains("PDCheckBox")) {
-//						PDCheckBox field = (PDCheckBox) acroForm.getField(fieldname);
-//						field.check();
-						System.out.println("public boolean "+fieldname.replace("[", "").replace(".", "")
-								.replace("]", "") + ";");
-//						
-					} else if(fieldname.contains("PDRadioButton")) {
-//						PDRadioButton field = (PDRadioButton) acroForm.getField(fieldname);
-//						field.setValue(fieldname);
-						System.out.println("public string "+fieldname.replace("[", "").replace(".", "")
-								.replace("]", "") + ";");
-					}
-				}
-			}
-
-			// Save and close the filled out form.
-			pdfDocument.setAllSecurityToBeRemoved(true);
-			if(pdfDocument.isAllSecurityToBeRemoved()) {
-				
-			}
-			pdfDocument.save("target/FillFormField.pdf");
-		}
-	}
-
 	public static List<String> getFieldsList() {
-		String formTemplate = "C:\\Users/vivsh/Downloads/1.pdf";
+		ClassPathResource pdfFile = new ClassPathResource("1.pdf");
 		List<String> fieldNames = new ArrayList<>();
-		try (PDDocument pdfDocument = PDDocument.load(new File(formTemplate))) {
+		try (PDDocument pdfDocument = PDDocument.load(pdfFile.getFile())) {
 
 			PDDocumentCatalog docCatalog = pdfDocument.getDocumentCatalog();
 			PDAcroForm acroForm = docCatalog.getAcroForm();
