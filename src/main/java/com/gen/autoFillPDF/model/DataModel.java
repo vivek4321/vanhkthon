@@ -3,6 +3,8 @@ package com.gen.autoFillPDF.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import net.minidev.json.JSONObject;
+
 // Mongo database annotation.
 @Document(collection= "pdfData")
 public class DataModel {
@@ -7065,4 +7067,12 @@ public class DataModel {
 		this.id = id;
 	}
 	
+	public JSONObject getFirstPageJson(){
+		 JSONObject json = new JSONObject();
+	        json.put("EMP5624_E[0].Page1[0].Yes_business[0]", this.isEMP5624_E0Page10Yes_business0PDCheckBox());
+	        json.put("EMP5624_E[0].Page1[0].No_business[0]",this.isEMP5624_E0Page10No_business0PDCheckBox());
+	        json.put("EMP5624_E[0].Page1[0].txtF_des_part[0]", this.getEMP5624_E0Page10txtF_des_part0PDTextField());
+			return json;
+		
+	}
 }

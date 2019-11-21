@@ -5,7 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -20,6 +22,8 @@ import org.apache.pdfbox.pdmodel.interactive.form.PDTextField;
 import org.springframework.core.io.ClassPathResource;
 
 import com.gen.autoFillPDF.model.DataModel;
+
+import net.minidev.json.JSONObject;
 
 /**
  * This will take a PDF document and return all the fields from the file.
@@ -37,7 +41,7 @@ public class GetFieldsList {
 	 * @throws IOException If there is an error getting the fields.
 	 */
 
-	private static List<String> processField(PDField field, String sParent, List<List<String>> fieldNames)
+	private static List<String> processField(PDField field, String sParent, List<String> fieldNames)
 			throws IOException {
 		String partialName = field.getPartialName();
 
@@ -47,8 +51,6 @@ public class GetFieldsList {
 					sParent = sParent + "." + partialName;
 				}
 			}
-			List<String> parent = new ArrayList<String>();
-			fieldNames.add(parent);
 			System.out.println(sParent);
 
 			for (PDField child : ((PDNonTerminalField) field).getChildren()) {
@@ -95,7 +97,7 @@ public class GetFieldsList {
 	public ByteArrayInputStream generatePdf(Optional<DataModel> dm, int id) throws IOException {
 		dm.get().getEMP5624_E0Page10txtF_first_name0PDTextField();
 		
-		List<String> fieldNames = getFieldsList();
+//		List<String> fieldNames = getFieldsList();
 //		for (String fieldname : fieldNames) {
 //			System.out.println(fieldname + "");
 //		}
@@ -105,29 +107,51 @@ public class GetFieldsList {
 
 		try (PDDocument pdfDocument = PDDocument.load(pdfFile.getInputStream())) {
 			PDAcroForm acroForm = pdfDocument.getDocumentCatalog().getAcroForm();
-			if (acroForm != null) {
-				for (String fieldname : fieldNames) {
-//					System.out.println("public string"+fieldname.replace("[", "").replace(".", "")
-//							.replace("]", "") + "");
-					if(fieldname.contains("PDTextField")) {
-					PDTextField field = (PDTextField) acroForm.getField(fieldname.replace("PDTextField", ""));
-					String str = fieldname.replace("[", "").replace(".", "").replace("]", "");
-					DataModel dim =dm.get();
-					field.setValue(dim.EMP5624_E0Page10rb_language_oral0PDRadioButton);
-					} else if(fieldname.contains("PDCheckBox")) {
-//						PDCheckBox field = (PDCheckBox) acroForm.getField(fieldname);
-//						field.check();
-						System.out.println("public boolean "+fieldname.replace("[", "").replace(".", "")
-								.replace("]", "") + ";");
-//						
-					} else if(fieldname.contains("PDRadioButton")) {
-//						PDRadioButton field = (PDRadioButton) acroForm.getField(fieldname);
-//						field.setValue(fieldname);
-						System.out.println("public string "+fieldname.replace("[", "").replace(".", "")
-								.replace("]", "") + ";");
+			List<Object> EMP5624_E = new ArrayList<>();
+			List<Object> pages = new ArrayList<>();
+			List<String> fields = new ArrayList<String>();
+					DataModel dataM = new DataModel();
+					
+					JSONObject js = dm.get().getFirstPageJson();
+					for (String i: js.keySet()) {
+					System.out.println(i);
+					System.out.println(js.getAsString(i));
+					PDField field = acroForm.getField(i);
+					System.out.println(field.getFieldType().toString());
+					if(field.toString().contains("PDTextField")) {
+						field.setValue(js.getAsString(i));
+					}else if(field.toString().contains("PDCheckBox")) {
+						((PDCheckBox) field).check();
+					}else if(field.toString().contains("PDRadioButton")) {
+						field.setValue(js.getAsString(i));
 					}
 				}
-			}
+			
+				
+//			if (acroForm != null) {
+//				for (String fieldname : fieldNames) {
+////					System.out.println("public string"+fieldname.replace("[", "").replace(".", "")
+////							.replace("]", "") + "");
+//					if(fieldname.contains("PDTextField")) {
+//						String pdfKey = fieldname.replace("PDTextField", "");
+//					PDTextField field = (PDTextField) acroForm.getField(fieldname.replace("PDTextField", ""));
+////					String str = fieldname.replace("[", "").replace(".", "").replace("]", "").replace("PDTextField", "");
+//					System.out.println(field.toString()); 
+//					field.setValue(js.getAsString(pdfKey));
+//					} else if(fieldname.contains("PDCheckBox")) {
+//						PDCheckBox field = (PDCheckBox) acroForm.getField(fieldname.replace("PDCheckBox", ""));
+////						PDCheckBox field = (PDCheckBox) acroForm.getField(fieldname);
+//						System.out.println("public boolean "+fieldname.replace("[", "").replace(".", "")
+//								.replace("]", "") + ";");
+////						
+//					} else if(fieldname.contains("PDRadioButton")) {
+////						PDRadioButton field = (PDRadioButton) acroForm.getField(fieldname);
+////						field.setValue(fieldname);
+//						System.out.println("public string "+fieldname.replace("[", "").replace(".", "")
+//								.replace("]", "") + ";");
+//					}
+//				}
+//			}
 
 			// Save and close the filled out form.
 			

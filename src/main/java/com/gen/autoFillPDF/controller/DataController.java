@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gen.autoFillPDF.model.DataModel;
+import com.gen.autoFillPDF.model.PageOneModel;
 import com.gen.autoFillPDF.service.DataService;
 
 @RestController
@@ -99,6 +100,16 @@ public class DataController {
 		e.setId(id);
 		serv.updateData(e);
 		return "data record for data-id= " + id + " updated.";
+	}
+	
+	@GetMapping(value= "/pageOne/{data-id}")
+	public Optional<DataModel> PageOne(@PathVariable(value= "data-id") int id) throws IOException {
+		logger.debug("Getting data with data-id= {}.", id);
+		GetFieldsList gfl = new GetFieldsList();
+
+//		Optional<PageOneModel> dm = serv.findPageOneById(id)(id);
+//		gfl.generatePdf(dm, id);
+		return serv.findDataById(id);
 	}
 
 }
